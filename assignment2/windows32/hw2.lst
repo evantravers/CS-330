@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    03/10/10 08:59:03
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    03/24/10 20:56:34
 .\hw2.asm						     Page 1 - 1
 
 
@@ -17,100 +17,75 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    03/10/10 08:59:03
 				.STACK 4096
 
  00000000			.DATA
- 00000000 00000000		number1   DWORD   ?
- 00000004 00000000		number2   DWORD   ?
- 00000008 45 6E 74 65 72	prompt1   BYTE    "Enter first number", 0
-	   20 66 69 72 73
-	   74 20 6E 75 6D
-	   62 65 72 00
- 0000001B 45 6E 74 65 72	prompt2   BYTE    "Enter second number", 0
-	   20 73 65 63 6F
-	   6E 64 20 6E 75
-	   6D 62 65 72 00
- 0000002F  00000028 [		string    BYTE    40 DUP (?)
+ 00000000 45 6E 74 65 72	     prompt1   BYTE    "Enter a number to add to the average: ", 0
+	   20 61 20 6E 75
+	   6D 62 65 72 20
+	   74 6F 20 61 64
+	   64 20 74 6F 20
+	   74 68 65 20 61
+	   76 65 72 61 67
+	   65 3A 20 00
+ 00000027  00000028 [		     string    BYTE    40 DUP (?)
 	    00
 	   ]
- 00000057 54 68 65 20 73	resultLbl BYTE    "The sum is", 0
-	   75 6D 20 69 73
-	   00
- 00000062 4E 75 6D 62 65	suberrlbl BYTE    "Numbers subtracted are zero",0
-	   72 73 20 73 75
-	   62 74 72 61 63
-	   74 65 64 20 61
-	   72 65 20 7A 65
-	   72 6F 00
- 0000007E 4E 75 6D 62 65	ovrflwlbl BYTE    "Numbers are too big to be multiplied",0
-	   72 73 20 61 72
-	   65 20 74 6F 6F
-	   20 62 69 67 20
-	   74 6F 20 62 65
-	   20 6D 75 6C 74
-	   69 70 6C 69 65
-	   64 00
- 000000A3 45 52 52 4F 52	errorm    BYTE    "ERROR!",0
-	   21 00
- 000000AA  0000000B [		sum       BYTE    11 DUP (?), 0
+ 0000004F 00000000		     number1   DWORD   ?
+ 00000053 54 68 65 20 61	     resultLbl BYTE    "The average is", 0
+	   76 65 72 61 67
+	   65 20 69 73 00
+ 00000062 59 6F 75 20 65	     errorMsg  BYTE    "You entered no numbers!", 0
+	   6E 74 65 72 65
+	   64 20 6E 6F 20
+	   6E 75 6D 62 65
+	   72 73 21 00
+ 0000007A  0000000B [		     sum       BYTE    11 DUP (?), 0
 	    00
 	   ] 00
 
  00000000			.CODE
  00000000			_MainProc PROC
-				        ; description of problem: read in two ints, compute following expression: A*B-(A+B)/(A-B)+=
-				        ; I converted to reverse polish, then coded.
-				        
-				        input   prompt1, string, 40      ; read ASCII characters
-				        atod    string                   ; convert to integer
- 0000002D  A3 00000000 R	        mov     number1, eax             ; store in memory
-
-				        input   prompt2, string, 40      ; repeat for second number
-				        atod    string
-
- 0000005F  A3 00000004 R	        mov     number2, eax
-				        
- 00000064  A1 00000000 R	        mov     eax,number1              ; move the A to eax
- 00000069  F7 2D 00000004 R	        imul    number2                  ; multiply A and B
- 0000006F  70 78		        jo      ovrflowerror             ; if the numbers are too big, throw an error
- 00000071  50			        push    eax                      ; push A*B to stack
-				        
- 00000072  A1 00000000 R	        mov     eax,number1              ; move A to eax in prep for subtraction
- 00000077  2B 05 00000004 R	        sub     eax,number2              ; subtract A and B
- 0000007D  74 4E		        jz      suberrorx                ; the numbers subtracted less than zero
- 0000007F  50			        push    eax                      ; push A-B to stack
-				        
- 00000080  A1 00000000 R	        mov     eax,number1              ; move A to eax in prep for addition
- 00000085  03 05 00000004 R	        add     eax,number2              ; add A and B
- 0000008B  50			        push    eax                      ; push A+B to stack
-				        
- 0000008C  58			        pop     eax                      ; popping A+B in order to divide it by A-B
- 0000008D  5B			        pop     ebx                      ; popping divisor A-B to EBX
- 0000008E  99			        cdq                              ; "spreading" it out over eax/edx for idiv
- 0000008F  F7 FB		        idiv    ebx                      ; divide A+B in eax:edx by A-B in EBX
- 00000091  50			        push    eax                      ; push (A+B)/(A-B) to stack
-				        
- 00000092  5B			        pop     ebx                      ; pop (A+B)/(A-B) from stack
- 00000093  58			        pop     eax                      ; pop A*B from stack
- 00000094  2B C3		        sub     eax,ebx                  ; A*B-(A+B)/(A-B)
-				        
-				        dtoa    sum, eax                 ; convert to ASCII characters
-				        output  resultLbl, sum           ; output label and sum
-
- 000000C7			        endx:
- 000000C7  B8 00000000		        mov     eax, 0                   ; exit with return code 0
- 000000CC  C3			        ret
-				        
- 000000CD			        suberrorx:
- 000000CD  58			        pop eax                          ; clear the stack
-				        output  errorm, suberrlbl        ; output error message
- 000000E7  EB DE		        jmp endx                         ; end the program  
-				        
- 000000E9			        ovrflowerror:
-				        output  errorm, ovrflwlbl        ; output error message
- 00000102  EB C3		        jmp endx
-				        
-				        
- 00000104			_MainProc ENDP
+				     ; Problem: Compute the average of numbers,
+				     ; possible number of inputs going up to 100.
+				     ; Solution: As each one comes in, increment a counter, 
+				     ; and keep adding the numbers together.
+				     ; At the end, divide the sum of all the 
+				     ; numbers by the counter, output result.   
+				     
+				     ; eax handles input, ebx handles the sum, ecx handles counter
+				     
+ 00000000  BB 00000000		     mov       ebx, 0                    ; put zero in eax and ecx
+ 00000005  B9 00000000		     mov       ecx, 0
+ 0000000A  B8 00000000		     mov       eax, 0
+				     
+ 0000000F			inputLoopx:
+				     ; for each input
+				     input     prompt1, string, 40       ; read ASCII characters
+				     atod      string                    ; convert to integer
+ 0000003C  83 F8 00		     cmp       eax, 0                    ; see if it's zero
+ 0000003F  74 05		     je        outLoopx                  ; get out of the loop
+ 00000041  03 D8		     add       ebx, eax                  ; add the new number to eax's sum
+ 00000043  41			     inc       ecx
+ 00000044  EB C9		     jmp       inputLoopx
+ 00000046			outLoopx:
+ 00000046  83 F9 00		     cmp       ecx, 0                    ; make sure that numbers have been entered
+ 00000049  74 37		     je        noneEntered
+				     ; now move the sum to eax, the divisor to ebx, and divide
+ 0000004B  8B C3		     mov       eax, ebx
+ 0000004D  99			     cdq
+ 0000004E  F7 F9		     idiv      ecx
+				     
+				     ; output result
+				     dtoa      sum, eax
+				     output    resultLbl, sum            ; output label and sum
+				     
+ 00000081  C3			     ret
+				     
+ 00000082			noneEntered:
+				     output    errorMsg, errorMsg
+ 0000009B  C3			     ret
+				     
+ 0000009C			_MainProc ENDP
 				END                                      ; end of source code
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    03/10/10 08:59:03
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    03/24/10 20:56:34
 .\hw2.asm						     Symbols 2 - 1
 
 
@@ -134,18 +109,18 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000000B6 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000104 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000086 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000009C Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000104 Public
-  endx . . . . . . . . . . . . .	L Near	 000000C7 _TEXT	
-  suberrorx  . . . . . . . . . .	L Near	 000000CD _TEXT	
-  ovrflowerror . . . . . . . . .	L Near	 000000E9 _TEXT	
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000009C Public
+  inputLoopx . . . . . . . . . .	L Near	 0000000F _TEXT	
+  outLoopx . . . . . . . . . . .	L Near	 00000046 _TEXT	
+  noneEntered  . . . . . . . . .	L Near	 00000082 _TEXT	
 
 
 Symbols:
@@ -166,16 +141,12 @@ _showOutput  . . . . . . . . . .	L Near	 00000000 FLAT	External
 atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
 atowproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
 dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
-errorm . . . . . . . . . . . . .	Byte	 000000A3 _DATA	
-number1  . . . . . . . . . . . .	DWord	 00000000 _DATA	
-number2  . . . . . . . . . . . .	DWord	 00000004 _DATA	
-ovrflwlbl  . . . . . . . . . . .	Byte	 0000007E _DATA	
-prompt1  . . . . . . . . . . . .	Byte	 00000008 _DATA	
-prompt2  . . . . . . . . . . . .	Byte	 0000001B _DATA	
-resultLbl  . . . . . . . . . . .	Byte	 00000057 _DATA	
-string . . . . . . . . . . . . .	Byte	 0000002F _DATA	
-suberrlbl  . . . . . . . . . . .	Byte	 00000062 _DATA	
-sum  . . . . . . . . . . . . . .	Byte	 000000AA _DATA	
+errorMsg . . . . . . . . . . . .	Byte	 00000062 _DATA	
+number1  . . . . . . . . . . . .	DWord	 0000004F _DATA	
+prompt1  . . . . . . . . . . . .	Byte	 00000000 _DATA	
+resultLbl  . . . . . . . . . . .	Byte	 00000053 _DATA	
+string . . . . . . . . . . . . .	Byte	 00000027 _DATA	
+sum  . . . . . . . . . . . . . .	Byte	 0000007A _DATA	
 wtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
 
 	   0 Warnings
