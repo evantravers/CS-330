@@ -51,12 +51,11 @@ outLoopx:
      ; output result
      dtoa      sum, eax
      output    resultLbl, sum            ; output label and sum
-     
-     ret
+     jmp endx
      
 noneEntered:
      output    errorMsg, errorMsg
+endx:
      ret
-     
 _MainProc ENDP
 END                                      ; end of source code
