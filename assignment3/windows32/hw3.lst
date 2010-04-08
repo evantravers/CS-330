@@ -1,0 +1,174 @@
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/07/10 23:29:40
+.\hw3.asm						     Page 1 - 1
+
+
+				; Author:  E. Travers
+				; Date:    3/2010
+
+				.586
+				.MODEL FLAT
+
+				INCLUDE io.h				 ; header file for input/output
+			      C ; IO.H -- header file for I/O macros (listing suppressed)
+			      C .NOLIST      ; turn off listing
+			      C .LIST        ; begin listing
+			      C 
+
+				.STACK 4096
+
+ 00000000			.DATA
+
+ 00000000  00000064 [		   thearray   DWORD   100 DUP (?)
+	    00000000
+	   ]
+ 00000190 45 6E 74 65 72	   prompt1    BYTE    "Enter a number to add to the sort: ", 0
+	   20 61 20 6E 75
+	   6D 62 65 72 20
+	   74 6F 20 61 64
+	   64 20 74 6F 20
+	   74 68 65 20 73
+	   6F 72 74 3A 20
+	   00
+ 000001B4 4F 6E 65 20 6F	   resultLbl  BYTE    "One of your results is: ",0
+	   66 20 79 6F 75
+	   72 20 72 65 73
+	   75 6C 74 73 20
+	   69 73 3A 20 00
+ 000001CD  00000014 [		   string     BYTE    20 DUP (?)
+	    00
+	   ]
+ 000001E1 00000000		   numElem    DWORD   ?
+
+ 00000000			.CODE
+ 00000000			_MainProc PROC
+
+ 00000000  B8 00000000		   mov        eax, 0
+ 00000005  BB 00000000		   mov        ebx, 0
+ 0000000A  B9 00000000		   mov        ecx, 0
+ 0000000F  BA 00000000		   mov        edx, 0
+
+ 00000014			inputLoopx:
+				   ; get input, stop when you see a zero
+				   input      prompt1, string, 40	 ; read ASCII characters
+				   atod       string
+ 00000041  83 F8 00		   cmp	      eax, 0
+ 00000044  74 0D		   je	      outLoopx
+				   ; if not zero, then add to the array
+ 00000046  89 04 8D		   mov        thearray[4*ecx], eax
+	   00000000 R
+ 0000004D  41			   inc        ecx
+ 0000004E  83 F9 64		   cmp        ecx,100
+ 00000051  75 C1		   jne        inputLoopx
+ 00000053			outLoopx:
+
+ 00000053  41			   inc        ecx
+ 00000054  89 0D 000001E1 R	   mov        numElem, ecx
+
+				   ; now sort the array
+				   ; for every item in the array in reverse order
+				   
+ 0000005A			outerLoopx:
+ 0000005A  BA 00000000		   mov        edx, 0
+ 0000005F			   innerLoopx:
+				      ; take each item, compare it to 0 increasing, stop when you find it bigger than the previous
+				      ; take the current item
+ 0000005F  8B 04 8D		      mov     eax, thearray[4*ecx]
+	   00000000 R
+				      ; take the next item (inner loop)
+ 00000066  8B 1C 95		      mov     ebx, thearray[4*edx]
+	   00000000 R
+ 0000006D  3B C3		      cmp     eax, ebx
+ 0000006F  7C 0E		      jl      swapSkipx
+				      
+				      ; swap
+ 00000071  89 04 95		      mov     thearray[4*edx], eax
+	   00000000 R
+ 00000078  89 1C 8D		      mov     thearray[4*ecx], ebx
+	   00000000 R
+ 0000007F			   swapSkipx:
+				   
+ 0000007F  42			      inc     edx;
+ 00000080  3B CA		      cmp     ecx, edx
+ 00000082  75 DB		   jnz innerLoopx
+ 00000084  E2 D4		loop outerLoopx  
+
+ 00000086  B9 00000001		   mov        ecx, 1
+ 0000008B			outputLoopx:
+				        dtoa   string, thearray[(4*ecx)-4]                
+				        output resultLbl, string
+				        
+ 000000C1  41			        inc   ecx
+ 000000C2  3B 0D 000001E1 R	        cmp   ecx, numElem
+ 000000C8  7C C1		        jl    outputLoopx
+ 000000CA  C3			ret
+
+ 000000CB			_MainProc ENDP
+				END					 ; end of source code
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/07/10 23:29:40
+.\hw3.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+atod . . . . . . . . . . . . . .	Proc
+atow . . . . . . . . . . . . . .	Proc
+dtoa . . . . . . . . . . . . . .	Proc
+input  . . . . . . . . . . . . .	Proc
+output . . . . . . . . . . . . .	Proc
+wtoa . . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 000001E5 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000CB Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000CB Public
+  inputLoopx . . . . . . . . . .	L Near	 00000014 _TEXT	
+  outLoopx . . . . . . . . . . .	L Near	 00000053 _TEXT	
+  outerLoopx . . . . . . . . . .	L Near	 0000005A _TEXT	
+  innerLoopx . . . . . . . . . .	L Near	 0000005F _TEXT	
+  swapSkipx  . . . . . . . . . .	L Near	 0000007F _TEXT	
+  outputLoopx  . . . . . . . . .	L Near	 0000008B _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_getInput  . . . . . . . . . . .	L Near	 00000000 FLAT	External
+_showOutput  . . . . . . . . . .	L Near	 00000000 FLAT	External
+atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+atowproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+numElem  . . . . . . . . . . . .	DWord	 000001E1 _DATA	
+prompt1  . . . . . . . . . . . .	Byte	 00000190 _DATA	
+resultLbl  . . . . . . . . . . .	Byte	 000001B4 _DATA	
+string . . . . . . . . . . . . .	Byte	 000001CD _DATA	
+thearray . . . . . . . . . . . .	DWord	 00000000 _DATA	
+wtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+
+	   0 Warnings
+	   0 Errors
