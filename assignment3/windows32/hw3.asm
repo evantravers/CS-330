@@ -10,9 +10,11 @@ INCLUDE io.h				 ; header file for input/output
 
 .DATA
 
-   thearray   DWORD   100 DUP (?)
+   thearray   DWORD   200 DUP (?)
    prompt1    BYTE    "Enter a number to add to the sort: ", 0
    resultLbl  BYTE    "One of your results is: ",0
+   ovrFlwlbl  BYTE    "Too many values entered!",0
+   noItemsx   BYTE    "No data entered!",0
    string     BYTE    20 DUP (?)
    numElem    DWORD   ?
 
@@ -33,10 +35,12 @@ inputLoopx:
    ; if not zero, then add to the array
    mov        thearray[4*ecx], eax
    inc        ecx
-   cmp        ecx,100
+   cmp        ecx,200
+   je         overFlowx
    jne        inputLoopx
 outLoopx:
-
+   cmp ecx, 0
+   je  noDatax
    inc        ecx
    mov        numElem, ecx
 
@@ -61,18 +65,24 @@ outerLoopx:
    
       inc     edx;
       cmp     ecx, edx
-   jnz innerLoopx
+   jnz        innerLoopx
 loop outerLoopx  
 
-   mov        ecx, 1
-outputLoopx:
-        dtoa   string, thearray[(4*ecx)-4]                
-        output resultLbl, string
-        
-        inc   ecx
-        cmp   ecx, numElem
-        jl    outputLoopx
-ret
+      mov     ecx, numElem
+      dec     ecx
+printx:
+      dtoa    string, thearray[(4*ecx)-4]                
+      output  resultLbl, string
+      dec     ecx
+      cmp     ecx, 0
+      jg      printx
+      ret
 
+overFlowx:
+      output  ovrFlwlbl,ovrFlwlbl
+      ret
+noDatax:
+      output  noItemsx,noItemsx
+      ret
 _MainProc ENDP
 END					 ; end of source code
