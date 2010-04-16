@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/09/10 10:53:30
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/13/10 08:30:48
 .\hw3.asm						     Page 1 - 1
 
 
@@ -48,6 +48,8 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/09/10 10:53:30
 
  00000000			.CODE
  00000000			_MainProc PROC
+
+				; takes in a series of integers, sorts them, and prints them out in ascending order.
 
  00000000  B8 00000000		   mov        eax, 0
  00000005  BB 00000000		   mov        ebx, 0
@@ -119,7 +121,7 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/09/10 10:53:30
  0000010F  C3			      ret
  00000110			_MainProc ENDP
 				END					 ; end of source code
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/09/10 10:53:30
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/13/10 08:30:48
 .\hw3.asm						     Symbols 2 - 1
 
 

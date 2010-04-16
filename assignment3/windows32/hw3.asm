@@ -21,6 +21,8 @@ INCLUDE io.h				 ; header file for input/output
 .CODE
 _MainProc PROC
 
+; takes in a series of integers, sorts them, and prints them out in ascending order.
+
    mov        eax, 0
    mov        ebx, 0
    mov        ecx, 0

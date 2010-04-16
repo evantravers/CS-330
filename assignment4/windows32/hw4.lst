@@ -1,0 +1,162 @@
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/15/10 23:59:15
+.\hw4.asm						     Page 1 - 1
+
+
+				; Author:  E. Travers
+				; Date:    4/2010
+
+				.586
+				.MODEL FLAT
+
+				INCLUDE io.h				 ; header file for input/output
+			      C ; IO.H -- header file for I/O macros (listing suppressed)
+			      C .NOLIST      ; turn off listing
+			      C .LIST        ; begin listing
+			      C 
+
+				.STACK 4096
+
+ 00000000			.DATA
+ 00000000 45 6E 74 65 72	prompt1    BYTE    "Enter a base 10 number to test: ", 0
+	   20 61 20 62 61
+	   73 65 20 31 30
+	   20 6E 75 6D 62
+	   65 72 20 74 6F
+	   20 74 65 73 74
+	   3A 20 00
+ 00000021  00000014 [		string     BYTE    20 DUP (?)
+	    00
+	   ]
+ 00000035 00000000		theNum     DWORD   ?
+ 00000039 54 68 65 20 4D	result     BYTE    "The MSB is ",0
+	   53 42 20 69 73
+	   20 00
+ 00000045 54 68 65 20 4C	result2    BYTE    "The LSB is ",0
+	   53 42 20 69 73
+	   20 00
+ 00000051 54 6F 74 61 6C	result3    BYTE    "Total number of set bits: ",0
+	   20 6E 75 6D 62
+	   65 72 20 6F 66
+	   20 73 65 74 20
+	   62 69 74 73 3A
+	   20 00
+ 0000006C 00000000		lstBit     DWORD   ?
+ 00000070 00000000		fstBit     DWORD   ?
+ 00000074 00000000		setBits    DWORD   ?
+				                   
+
+ 00000000			.CODE
+ 00000000			_MainProc PROC
+				; Given a 32 bit integer, find the rightmost, the leftmost,
+				; and the number of on bits in the number
+
+				input      prompt1, string, 40	 ; read ASCII characters
+				atod       string
+
+				; now the famous number is in eax
+
+				; find the MSB order bit
+ 0000002D  0F BC D8		BSF        ebx, eax
+				dtoa       lstBit, ebx
+				output     result2, lstBit
+
+				; time to find the LSB bit
+
+ 00000061  0F BD D8		BSR        ebx, eax
+				dtoa       fstBit, ebx
+				output     result, fstBit
+
+				; find the number of bits
+
+				; set the loop counter
+ 00000095  B9 00000020		mov        ecx,32
+
+				; make the bit detector
+ 0000009A  BA 00000001		mov        edx,1
+
+				; keep the number of set bits
+ 0000009F  BB 00000000		mov        ebx,0
+
+ 000000A4			bitCntr:
+ 000000A4  85 D0		   test    edx, eax
+ 000000A6  74 01		   jz      skipx
+ 000000A8  43			      inc  ebx
+ 000000A9			   skipx:
+ 000000A9  D1 E2		   shl     edx,1
+ 000000AB  E2 F7		loop bitCntr
+
+				dtoa       setBits, ebx
+				output     result3, setBits
+
+ 000000DE  C3			ret
+
+ 000000DF			_MainProc ENDP
+				END					 ; end of source code
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/15/10 23:59:15
+.\hw4.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+atod . . . . . . . . . . . . . .	Proc
+atow . . . . . . . . . . . . . .	Proc
+dtoa . . . . . . . . . . . . . .	Proc
+input  . . . . . . . . . . . . .	Proc
+output . . . . . . . . . . . . .	Proc
+wtoa . . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000078 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000DF Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000DF Public
+  bitCntr  . . . . . . . . . . .	L Near	 000000A4 _TEXT	
+  skipx  . . . . . . . . . . . .	L Near	 000000A9 _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+_getInput  . . . . . . . . . . .	L Near	 00000000 FLAT	External
+_showOutput  . . . . . . . . . .	L Near	 00000000 FLAT	External
+atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+atowproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+fstBit . . . . . . . . . . . . .	DWord	 00000070 _DATA	
+lstBit . . . . . . . . . . . . .	DWord	 0000006C _DATA	
+prompt1  . . . . . . . . . . . .	Byte	 00000000 _DATA	
+result2  . . . . . . . . . . . .	Byte	 00000045 _DATA	
+result3  . . . . . . . . . . . .	Byte	 00000051 _DATA	
+result . . . . . . . . . . . . .	Byte	 00000039 _DATA	
+setBits  . . . . . . . . . . . .	DWord	 00000074 _DATA	
+string . . . . . . . . . . . . .	Byte	 00000021 _DATA	
+theNum . . . . . . . . . . . . .	DWord	 00000035 _DATA	
+wtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+
+	   0 Warnings
+	   0 Errors
