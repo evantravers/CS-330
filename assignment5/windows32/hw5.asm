@@ -88,6 +88,21 @@ fild     AA
 fmul     TWO
 fdiv
 
+fild     BB
+fild     BB
+fmul
+fild     AA
+fild     CC
+fmul
+fmul     FOUR
+fsub
+fsqrt
+fild     BB
+fadd
+fild     AA
+fmul     TWO
+fdiv
+
 ; =======================================
 ; OUTPUT
 ; =======================================
@@ -99,10 +114,13 @@ fdiv
 ; time to get the integer part off, and clear it off the answer
 ; on the top of the stack
 
+; do it twice for both numbers
+mov ecx, 2
+
+outputLoop:
+
 fist     xswap         ; move the integer part off
 fisub    xswap         ; clear the whole part off the stack
-
-; TODO need to get the whole part, place in wholex
 
 mov      eax, xswap
 dtoa     wholex, eax
@@ -135,6 +153,9 @@ add      eax, 30h      ; convert
 mov      D3, al
 
 output   labelx, outx    ; display the answer
+
+dec ecx
+jnz outputLoop
   
 ret
 

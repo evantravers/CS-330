@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:40:57
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:57:14
 .\hw5.asm						     Page 1 - 1
 
 
@@ -117,6 +117,21 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:40:57
  000000E3  D8 0D 00000060 R	fmul     TWO
  000000E9  DE F9		fdiv
 				
+ 000000EB  DB 05 00000004 R	fild     BB
+ 000000F1  DB 05 00000004 R	fild     BB
+ 000000F7  DE C9		fmul
+ 000000F9  DB 05 00000000 R	fild     AA
+ 000000FF  DB 05 00000008 R	fild     CC
+ 00000105  DE C9		fmul
+ 00000107  D8 0D 0000005C R	fmul     FOUR
+ 0000010D  DE E9		fsub
+ 0000010F  D9 FA		fsqrt
+ 00000111  DB 05 00000004 R	fild     BB
+ 00000117  DE C1		fadd
+ 00000119  DB 05 00000000 R	fild     AA
+ 0000011F  D8 0D 00000060 R	fmul     TWO
+ 00000125  DE F9		fdiv
+				
 				; =======================================
 				; OUTPUT
 				; =======================================
@@ -128,48 +143,54 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:40:57
 				; time to get the integer part off, and clear it off the answer
 				; on the top of the stack
 				
- 000000EB  DB 15 00000054 R	fist     xswap         ; move the integer part off
- 000000F1  DA 25 00000054 R	fisub    xswap         ; clear the whole part off the stack
+				; do it twice for both numbers
+ 00000127  B9 00000002		mov ecx, 2
 				
-				; TODO need to get the whole part, place in wholex
+ 0000012C			outputLoop:
 				
- 000000F7  A1 00000054 R	mov      eax, xswap
+ 0000012C  DB 15 00000054 R	fist     xswap         ; move the integer part off
+ 00000132  DA 25 00000054 R	fisub    xswap         ; clear the whole part off the stack
+				
+ 00000138  A1 00000054 R	mov      eax, xswap
 				dtoa     wholex, eax
 				
- 00000114  D8 0D 00000058 R	fmul     ten           ; move the tenths to the whole part
+ 00000155  D8 0D 00000058 R	fmul     ten           ; move the tenths to the whole part
 				; 2.340
- 0000011A  DB 15 00000054 R	fist     xswap
- 00000120  DA 25 00000054 R	fisub    xswap
+ 0000015B  DB 15 00000054 R	fist     xswap
+ 00000161  DA 25 00000054 R	fisub    xswap
 				; 0.340
- 00000126  A1 00000054 R	mov      eax, xswap
- 0000012B  83 C0 30		add      eax, 30h      ; convert
- 0000012E  A2 000000A3 R	mov      D1, al
+ 00000167  A1 00000054 R	mov      eax, xswap
+ 0000016C  83 C0 30		add      eax, 30h      ; convert
+ 0000016F  A2 000000A3 R	mov      D1, al
 				
- 00000133  D8 0D 00000058 R	fmul     ten           ; move the hundredths to the whole part
+ 00000174  D8 0D 00000058 R	fmul     ten           ; move the hundredths to the whole part
 				; 3.400
- 00000139  DB 15 00000054 R	fist     xswap
- 0000013F  DA 25 00000054 R	fisub    xswap
+ 0000017A  DB 15 00000054 R	fist     xswap
+ 00000180  DA 25 00000054 R	fisub    xswap
 				; 0.400
- 00000145  A1 00000054 R	mov      eax, xswap
- 0000014A  83 C0 30		add      eax, 30h      ; convert
- 0000014D  A2 000000A4 R	mov      D2, al
+ 00000186  A1 00000054 R	mov      eax, xswap
+ 0000018B  83 C0 30		add      eax, 30h      ; convert
+ 0000018E  A2 000000A4 R	mov      D2, al
 				
- 00000152  D8 0D 00000058 R	fmul     ten           ; move the thousandths to the whole part
+ 00000193  D8 0D 00000058 R	fmul     ten           ; move the thousandths to the whole part
 				; 4.000
- 00000158  DB 15 00000054 R	fist     xswap
- 0000015E  DA 25 00000054 R	fisub    xswap
+ 00000199  DB 15 00000054 R	fist     xswap
+ 0000019F  DA 25 00000054 R	fisub    xswap
 				; 0.000
- 00000164  A1 00000054 R	mov      eax, xswap
- 00000169  83 C0 30		add      eax, 30h      ; convert
- 0000016C  A2 000000A5 R	mov      D3, al
+ 000001A5  A1 00000054 R	mov      eax, xswap
+ 000001AA  83 C0 30		add      eax, 30h      ; convert
+ 000001AD  A2 000000A5 R	mov      D3, al
 				
 				output   labelx, outx    ; display the answer
-				  
- 0000018A  C3			ret
 				
- 0000018B			_MainProc ENDP
+ 000001CB  49			dec ecx
+ 000001CC  0F 85 FFFFFF5A	jnz outputLoop
+				  
+ 000001D2  C3			ret
+				
+ 000001D3			_MainProc ENDP
 				END					 ; end of source code
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:40:57
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:57:14
 .\hw5.asm						     Symbols 2 - 1
 
 
@@ -194,14 +215,15 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000000A7 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000018B Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001D3 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000018B Public
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000001D3 Public
+  outputLoop . . . . . . . . . .	L Near	 0000012C _TEXT	
 
 
 Symbols:
