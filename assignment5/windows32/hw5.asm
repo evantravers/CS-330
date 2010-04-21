@@ -92,8 +92,6 @@ fdiv
 ; OUTPUT
 ; =======================================
 
-fldpi
-
 ; code to decode final answer and put it in outx
 ; considering a whole floating point on the stack
 ; like 1.234
@@ -107,7 +105,7 @@ fisub    xswap         ; clear the whole part off the stack
 ; TODO need to get the whole part, place in wholex
 
 mov      eax, xswap
-atod     wholex, eax
+dtoa     wholex, eax
 
 fmul     ten           ; move the tenths to the whole part
 ; 2.340

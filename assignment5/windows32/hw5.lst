@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 22:42:24
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:40:57
 .\hw5.asm						     Page 1 - 1
 
 
@@ -121,8 +121,6 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 22:42:24
 				; OUTPUT
 				; =======================================
 				
- 000000EB  D9 EB		fldpi
-				
 				; code to decode final answer and put it in outx
 				; considering a whole floating point on the stack
 				; like 1.234
@@ -130,52 +128,48 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 22:42:24
 				; time to get the integer part off, and clear it off the answer
 				; on the top of the stack
 				
- 000000ED  DB 15 00000054 R	fist     xswap         ; move the integer part off
- 000000F3  DA 25 00000054 R	fisub    xswap         ; clear the whole part off the stack
+ 000000EB  DB 15 00000054 R	fist     xswap         ; move the integer part off
+ 000000F1  DA 25 00000054 R	fisub    xswap         ; clear the whole part off the stack
 				
 				; TODO need to get the whole part, place in wholex
 				
- 000000F9  A1 00000054 R	mov      eax, xswap
-				atod     wholex, eax
-			     1	            lea    eax,wholex          ; source address to AX
-.\hw5.asm(110) : warning A4006:too many arguments in macro call
- atod(1): Macro Called From
-  .\hw5.asm(110): Main Line Code
+ 000000F7  A1 00000054 R	mov      eax, xswap
+				dtoa     wholex, eax
 				
- 0000010D  D8 0D 00000058 R	fmul     ten           ; move the tenths to the whole part
+ 00000114  D8 0D 00000058 R	fmul     ten           ; move the tenths to the whole part
 				; 2.340
- 00000113  DB 15 00000054 R	fist     xswap
- 00000119  DA 25 00000054 R	fisub    xswap
+ 0000011A  DB 15 00000054 R	fist     xswap
+ 00000120  DA 25 00000054 R	fisub    xswap
 				; 0.340
- 0000011F  A1 00000054 R	mov      eax, xswap
- 00000124  83 C0 30		add      eax, 30h      ; convert
- 00000127  A2 000000A3 R	mov      D1, al
+ 00000126  A1 00000054 R	mov      eax, xswap
+ 0000012B  83 C0 30		add      eax, 30h      ; convert
+ 0000012E  A2 000000A3 R	mov      D1, al
 				
- 0000012C  D8 0D 00000058 R	fmul     ten           ; move the hundredths to the whole part
+ 00000133  D8 0D 00000058 R	fmul     ten           ; move the hundredths to the whole part
 				; 3.400
- 00000132  DB 15 00000054 R	fist     xswap
- 00000138  DA 25 00000054 R	fisub    xswap
+ 00000139  DB 15 00000054 R	fist     xswap
+ 0000013F  DA 25 00000054 R	fisub    xswap
 				; 0.400
- 0000013E  A1 00000054 R	mov      eax, xswap
- 00000143  83 C0 30		add      eax, 30h      ; convert
- 00000146  A2 000000A4 R	mov      D2, al
+ 00000145  A1 00000054 R	mov      eax, xswap
+ 0000014A  83 C0 30		add      eax, 30h      ; convert
+ 0000014D  A2 000000A4 R	mov      D2, al
 				
- 0000014B  D8 0D 00000058 R	fmul     ten           ; move the thousandths to the whole part
+ 00000152  D8 0D 00000058 R	fmul     ten           ; move the thousandths to the whole part
 				; 4.000
- 00000151  DB 15 00000054 R	fist     xswap
- 00000157  DA 25 00000054 R	fisub    xswap
+ 00000158  DB 15 00000054 R	fist     xswap
+ 0000015E  DA 25 00000054 R	fisub    xswap
 				; 0.000
- 0000015D  A1 00000054 R	mov      eax, xswap
- 00000162  83 C0 30		add      eax, 30h      ; convert
- 00000165  A2 000000A5 R	mov      D3, al
+ 00000164  A1 00000054 R	mov      eax, xswap
+ 00000169  83 C0 30		add      eax, 30h      ; convert
+ 0000016C  A2 000000A5 R	mov      D3, al
 				
 				output   labelx, outx    ; display the answer
 				  
- 00000183  C3			ret
+ 0000018A  C3			ret
 				
- 00000184			_MainProc ENDP
+ 0000018B			_MainProc ENDP
 				END					 ; end of source code
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 22:42:24
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:40:57
 .\hw5.asm						     Symbols 2 - 1
 
 
@@ -200,14 +194,14 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000000A7 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000184 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000018B Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000184 Public
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000018B Public
 
 
 Symbols:
@@ -249,5 +243,5 @@ wholex . . . . . . . . . . . . .	Byte	 00000097 _DATA
 wtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
 xswap  . . . . . . . . . . . . .	DWord	 00000054 _DATA	
 
-	   1 Warnings
+	   0 Warnings
 	   0 Errors
