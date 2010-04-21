@@ -1,0 +1,253 @@
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 22:42:24
+.\hw5.asm						     Page 1 - 1
+
+
+				; Author:  E. Travers
+				; Date:    4/2010
+				
+				.586
+				.MODEL FLAT
+				
+				INCLUDE io.h				 ; header file for input/output
+			      C ; IO.H -- header file for I/O macros (listing suppressed)
+			      C .NOLIST      ; turn off listing
+			      C .LIST        ; begin listing
+			      C 
+				
+				.STACK 4096
+				
+ 00000000			.DATA
+ 00000000 00000000		AA       DWORD    ?
+ 00000004 00000000		BB       DWORD    ?
+ 00000008 00000000		CC       DWORD    ?
+ 0000000C 45 6E 74 65 72	labela   BYTE     "Enter the integer for A",0
+	   20 74 68 65 20
+	   69 6E 74 65 67
+	   65 72 20 66 6F
+	   72 20 41 00
+ 00000024 45 6E 74 65 72	labelb   BYTE     "Enter the integer for B",0
+	   20 74 68 65 20
+	   69 6E 74 65 67
+	   65 72 20 66 6F
+	   72 20 42 00
+ 0000003C 45 6E 74 65 72	labelc   BYTE     "Enter the integer for C",0
+	   20 74 68 65 20
+	   69 6E 74 65 67
+	   65 72 20 66 6F
+	   72 20 43 00
+				
+ 00000054 00000000		xswap    DWORD    ?
+ 00000058 41200000		TEN      REAL4    10.0
+ 0000005C 40800000		FOUR     REAL4    4.0  
+ 00000060 40000000		TWO      REAL4    2.0 
+ 00000064 0000			statx    WORD     ? 
+ 00000066 4145851F		testx    REAL4    12.345
+ 0000006A  00000014 [		inputx   BYTE     20 dup (?)
+	    00
+	   ]
+				
+ 0000007E 48 65 72 65 27	labelx   BYTE     "Here's your sign",0
+	   73 20 79 6F 75
+	   72 20 73 69 67
+	   6E 00
+				
+ 0000008F 61 6E 73 77 65	outx     BYTE     "answer: "
+	   72 3A 20
+ 00000097			wholex   BYTE     11 dup (?)
+ 000000A2  2E			         BYTE     "." 
+ 000000A3 00			D1       BYTE     ?
+ 000000A4 00			D2       BYTE     ?
+ 000000A5 00			D3       BYTE     ?
+ 000000A6  00			         BYTE     0
+				
+ 00000000			.CODE
+ 00000000			_MainProc PROC
+				
+				; performs the quadratic formula
+				; AX^2 + BX + C
+				
+ 00000000  9B DB E3		finit
+				
+				; set to truncate mode
+ 00000003  9B D9 3D		fstcw    statx
+	   00000064 R
+ 0000000A  66| 81 0D		or       statx, 0F00h
+	   00000064 R
+	   0F00
+ 00000013  D9 2D 00000064 R	fldcw    statx
+				
+				; get integers in
+				
+				; =======================================
+				; INPUT
+				; =======================================
+				
+				input    labela, inputx, 40
+				atod     inputx
+ 00000046  A3 00000000 R	mov      AA, eax
+				
+				input    labelb, inputx, 40
+				atod     inputx
+ 00000078  A3 00000004 R	mov      BB, eax
+				
+				input    labelc, inputx, 40
+				atod     inputx
+ 000000AA  A3 00000008 R	mov      CC, eax
+				
+				; compute the quadratic formula, leaving it at the top of the
+				; floating point stack
+				
+				; =======================================
+				; COMPUTATION
+				; =======================================
+				; (-b + sqrt(b*b-4*a*c))/(2*a)
+				
+ 000000AF  DB 05 00000004 R	fild     BB
+ 000000B5  DB 05 00000004 R	fild     BB
+ 000000BB  DE C9		fmul
+ 000000BD  DB 05 00000000 R	fild     AA
+ 000000C3  DB 05 00000008 R	fild     CC
+ 000000C9  DE C9		fmul
+ 000000CB  D8 0D 0000005C R	fmul     FOUR
+ 000000D1  DE E9		fsub
+ 000000D3  D9 FA		fsqrt
+ 000000D5  DB 05 00000004 R	fild     BB
+ 000000DB  DE E9		fsub
+ 000000DD  DB 05 00000000 R	fild     AA
+ 000000E3  D8 0D 00000060 R	fmul     TWO
+ 000000E9  DE F9		fdiv
+				
+				; =======================================
+				; OUTPUT
+				; =======================================
+				
+ 000000EB  D9 EB		fldpi
+				
+				; code to decode final answer and put it in outx
+				; considering a whole floating point on the stack
+				; like 1.234
+				
+				; time to get the integer part off, and clear it off the answer
+				; on the top of the stack
+				
+ 000000ED  DB 15 00000054 R	fist     xswap         ; move the integer part off
+ 000000F3  DA 25 00000054 R	fisub    xswap         ; clear the whole part off the stack
+				
+				; TODO need to get the whole part, place in wholex
+				
+ 000000F9  A1 00000054 R	mov      eax, xswap
+				atod     wholex, eax
+			     1	            lea    eax,wholex          ; source address to AX
+.\hw5.asm(110) : warning A4006:too many arguments in macro call
+ atod(1): Macro Called From
+  .\hw5.asm(110): Main Line Code
+				
+ 0000010D  D8 0D 00000058 R	fmul     ten           ; move the tenths to the whole part
+				; 2.340
+ 00000113  DB 15 00000054 R	fist     xswap
+ 00000119  DA 25 00000054 R	fisub    xswap
+				; 0.340
+ 0000011F  A1 00000054 R	mov      eax, xswap
+ 00000124  83 C0 30		add      eax, 30h      ; convert
+ 00000127  A2 000000A3 R	mov      D1, al
+				
+ 0000012C  D8 0D 00000058 R	fmul     ten           ; move the hundredths to the whole part
+				; 3.400
+ 00000132  DB 15 00000054 R	fist     xswap
+ 00000138  DA 25 00000054 R	fisub    xswap
+				; 0.400
+ 0000013E  A1 00000054 R	mov      eax, xswap
+ 00000143  83 C0 30		add      eax, 30h      ; convert
+ 00000146  A2 000000A4 R	mov      D2, al
+				
+ 0000014B  D8 0D 00000058 R	fmul     ten           ; move the thousandths to the whole part
+				; 4.000
+ 00000151  DB 15 00000054 R	fist     xswap
+ 00000157  DA 25 00000054 R	fisub    xswap
+				; 0.000
+ 0000015D  A1 00000054 R	mov      eax, xswap
+ 00000162  83 C0 30		add      eax, 30h      ; convert
+ 00000165  A2 000000A5 R	mov      D3, al
+				
+				output   labelx, outx    ; display the answer
+				  
+ 00000183  C3			ret
+				
+ 00000184			_MainProc ENDP
+				END					 ; end of source code
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 22:42:24
+.\hw5.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+atod . . . . . . . . . . . . . .	Proc
+atow . . . . . . . . . . . . . .	Proc
+dtoa . . . . . . . . . . . . . .	Proc
+input  . . . . . . . . . . . . .	Proc
+output . . . . . . . . . . . . .	Proc
+wtoa . . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 000000A7 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000184 Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000184 Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+AA . . . . . . . . . . . . . . .	DWord	 00000000 _DATA	
+BB . . . . . . . . . . . . . . .	DWord	 00000004 _DATA	
+CC . . . . . . . . . . . . . . .	DWord	 00000008 _DATA	
+D1 . . . . . . . . . . . . . . .	Byte	 000000A3 _DATA	
+D2 . . . . . . . . . . . . . . .	Byte	 000000A4 _DATA	
+D3 . . . . . . . . . . . . . . .	Byte	 000000A5 _DATA	
+FOUR . . . . . . . . . . . . . .	DWord	 0000005C _DATA	
+TEN  . . . . . . . . . . . . . .	DWord	 00000058 _DATA	
+TWO  . . . . . . . . . . . . . .	DWord	 00000060 _DATA	
+_getInput  . . . . . . . . . . .	L Near	 00000000 FLAT	External
+_showOutput  . . . . . . . . . .	L Near	 00000000 FLAT	External
+atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+atowproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+inputx . . . . . . . . . . . . .	Byte	 0000006A _DATA	
+labela . . . . . . . . . . . . .	Byte	 0000000C _DATA	
+labelb . . . . . . . . . . . . .	Byte	 00000024 _DATA	
+labelc . . . . . . . . . . . . .	Byte	 0000003C _DATA	
+labelx . . . . . . . . . . . . .	Byte	 0000007E _DATA	
+outx . . . . . . . . . . . . . .	Byte	 0000008F _DATA	
+statx  . . . . . . . . . . . . .	Word	 00000064 _DATA	
+testx  . . . . . . . . . . . . .	DWord	 00000066 _DATA	
+wholex . . . . . . . . . . . . .	Byte	 00000097 _DATA	
+wtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+xswap  . . . . . . . . . . . . .	DWord	 00000054 _DATA	
+
+	   1 Warnings
+	   0 Errors
