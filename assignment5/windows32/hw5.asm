@@ -15,6 +15,7 @@ CC       DWORD    ?
 labela   BYTE     "Enter the integer for A",0
 labelb   BYTE     "Enter the integer for B",0
 labelc   BYTE     "Enter the integer for C",0
+GTHfail  BYTE     "You've found an imaginary number!",0
 
 xswap    DWORD    ?
 TEN      REAL4    10.0
@@ -82,8 +83,18 @@ fmul
 fmul     FOUR
 fsub
 fsqrt
+
+; to handle the imaginary number problem
+fldz
+fxch
+fcom st(1)
+fstsw ax
+sahf
+jnae GTH ; if negative
+
 fild     BB
-fsub
+fchs   
+fsubr
 fild     AA
 fmul     TWO
 fdiv
@@ -98,6 +109,7 @@ fmul     FOUR
 fsub
 fsqrt
 fild     BB
+fchs     
 fadd
 fild     AA
 fmul     TWO
@@ -154,9 +166,16 @@ mov      D3, al
 
 output   labelx, outx    ; display the answer
 
+fistp    xswap
+
 dec ecx
 jnz outputLoop
   
+ret
+
+GTH:
+; you've found an imaginary number!
+output GTHfail,GTHfail
 ret
 
 _MainProc ENDP

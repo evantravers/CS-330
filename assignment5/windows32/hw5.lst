@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:57:14
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
 .\hw5.asm						     Page 1 - 1
 
 
@@ -35,30 +35,37 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:57:14
 	   69 6E 74 65 67
 	   65 72 20 66 6F
 	   72 20 43 00
+ 00000054 59 6F 75 27 76	GTHfail  BYTE     "You've found an imaginary number!",0
+	   65 20 66 6F 75
+	   6E 64 20 61 6E
+	   20 69 6D 61 67
+	   69 6E 61 72 79
+	   20 6E 75 6D 62
+	   65 72 21 00
 				
- 00000054 00000000		xswap    DWORD    ?
- 00000058 41200000		TEN      REAL4    10.0
- 0000005C 40800000		FOUR     REAL4    4.0  
- 00000060 40000000		TWO      REAL4    2.0 
- 00000064 0000			statx    WORD     ? 
- 00000066 4145851F		testx    REAL4    12.345
- 0000006A  00000014 [		inputx   BYTE     20 dup (?)
+ 00000076 00000000		xswap    DWORD    ?
+ 0000007A 41200000		TEN      REAL4    10.0
+ 0000007E 40800000		FOUR     REAL4    4.0  
+ 00000082 40000000		TWO      REAL4    2.0 
+ 00000086 0000			statx    WORD     ? 
+ 00000088 4145851F		testx    REAL4    12.345
+ 0000008C  00000014 [		inputx   BYTE     20 dup (?)
 	    00
 	   ]
 				
- 0000007E 48 65 72 65 27	labelx   BYTE     "Here's your sign",0
+ 000000A0 48 65 72 65 27	labelx   BYTE     "Here's your sign",0
 	   73 20 79 6F 75
 	   72 20 73 69 67
 	   6E 00
 				
- 0000008F 61 6E 73 77 65	outx     BYTE     "answer: "
+ 000000B1 61 6E 73 77 65	outx     BYTE     "answer: "
 	   72 3A 20
- 00000097			wholex   BYTE     11 dup (?)
- 000000A2  2E			         BYTE     "." 
- 000000A3 00			D1       BYTE     ?
- 000000A4 00			D2       BYTE     ?
- 000000A5 00			D3       BYTE     ?
- 000000A6  00			         BYTE     0
+ 000000B9			wholex   BYTE     11 dup (?)
+ 000000C4  2E			         BYTE     "." 
+ 000000C5 00			D1       BYTE     ?
+ 000000C6 00			D2       BYTE     ?
+ 000000C7 00			D3       BYTE     ?
+ 000000C8  00			         BYTE     0
 				
  00000000			.CODE
  00000000			_MainProc PROC
@@ -70,11 +77,11 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:57:14
 				
 				; set to truncate mode
  00000003  9B D9 3D		fstcw    statx
-	   00000064 R
+	   00000086 R
  0000000A  66| 81 0D		or       statx, 0F00h
-	   00000064 R
+	   00000086 R
 	   0F00
- 00000013  D9 2D 00000064 R	fldcw    statx
+ 00000013  D9 2D 00000086 R	fldcw    statx
 				
 				; get integers in
 				
@@ -108,29 +115,40 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:57:14
  000000BD  DB 05 00000000 R	fild     AA
  000000C3  DB 05 00000008 R	fild     CC
  000000C9  DE C9		fmul
- 000000CB  D8 0D 0000005C R	fmul     FOUR
+ 000000CB  D8 0D 0000007E R	fmul     FOUR
  000000D1  DE E9		fsub
  000000D3  D9 FA		fsqrt
- 000000D5  DB 05 00000004 R	fild     BB
- 000000DB  DE E9		fsub
- 000000DD  DB 05 00000000 R	fild     AA
- 000000E3  D8 0D 00000060 R	fmul     TWO
- 000000E9  DE F9		fdiv
 				
- 000000EB  DB 05 00000004 R	fild     BB
- 000000F1  DB 05 00000004 R	fild     BB
- 000000F7  DE C9		fmul
- 000000F9  DB 05 00000000 R	fild     AA
- 000000FF  DB 05 00000008 R	fild     CC
- 00000105  DE C9		fmul
- 00000107  D8 0D 0000005C R	fmul     FOUR
- 0000010D  DE E9		fsub
- 0000010F  D9 FA		fsqrt
- 00000111  DB 05 00000004 R	fild     BB
- 00000117  DE C1		fadd
- 00000119  DB 05 00000000 R	fild     AA
- 0000011F  D8 0D 00000060 R	fmul     TWO
- 00000125  DE F9		fdiv
+				; to handle the imaginary number problem
+ 000000D5  D9 EE		fldz
+ 000000D7  D9 C9		fxch
+ 000000D9  D8 D1		fcom st(1)
+ 000000DB  9B DF E0		fstsw ax
+ 000000DE  9E			sahf
+ 000000DF  0F 82 00000108	jnae GTH ; if negative
+				
+ 000000E5  DB 05 00000004 R	fild     BB
+ 000000EB  D9 E0		fchs   
+ 000000ED  DE E1		fsubr
+ 000000EF  DB 05 00000000 R	fild     AA
+ 000000F5  D8 0D 00000082 R	fmul     TWO
+ 000000FB  DE F9		fdiv
+				
+ 000000FD  DB 05 00000004 R	fild     BB
+ 00000103  DB 05 00000004 R	fild     BB
+ 00000109  DE C9		fmul
+ 0000010B  DB 05 00000000 R	fild     AA
+ 00000111  DB 05 00000008 R	fild     CC
+ 00000117  DE C9		fmul
+ 00000119  D8 0D 0000007E R	fmul     FOUR
+ 0000011F  DE E9		fsub
+ 00000121  D9 FA		fsqrt
+ 00000123  DB 05 00000004 R	fild     BB
+ 00000129  D9 E0		fchs     
+ 0000012B  DE C1		fadd
+ 0000012D  DB 05 00000000 R	fild     AA
+ 00000133  D8 0D 00000082 R	fmul     TWO
+ 00000139  DE F9		fdiv
 				
 				; =======================================
 				; OUTPUT
@@ -144,53 +162,60 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:57:14
 				; on the top of the stack
 				
 				; do it twice for both numbers
- 00000127  B9 00000002		mov ecx, 2
+ 0000013B  B9 00000002		mov ecx, 2
 				
- 0000012C			outputLoop:
+ 00000140			outputLoop:
 				
- 0000012C  DB 15 00000054 R	fist     xswap         ; move the integer part off
- 00000132  DA 25 00000054 R	fisub    xswap         ; clear the whole part off the stack
+ 00000140  DB 15 00000076 R	fist     xswap         ; move the integer part off
+ 00000146  DA 25 00000076 R	fisub    xswap         ; clear the whole part off the stack
 				
- 00000138  A1 00000054 R	mov      eax, xswap
+ 0000014C  A1 00000076 R	mov      eax, xswap
 				dtoa     wholex, eax
 				
- 00000155  D8 0D 00000058 R	fmul     ten           ; move the tenths to the whole part
+ 00000169  D8 0D 0000007A R	fmul     ten           ; move the tenths to the whole part
 				; 2.340
- 0000015B  DB 15 00000054 R	fist     xswap
- 00000161  DA 25 00000054 R	fisub    xswap
+ 0000016F  DB 15 00000076 R	fist     xswap
+ 00000175  DA 25 00000076 R	fisub    xswap
 				; 0.340
- 00000167  A1 00000054 R	mov      eax, xswap
- 0000016C  83 C0 30		add      eax, 30h      ; convert
- 0000016F  A2 000000A3 R	mov      D1, al
+ 0000017B  A1 00000076 R	mov      eax, xswap
+ 00000180  83 C0 30		add      eax, 30h      ; convert
+ 00000183  A2 000000C5 R	mov      D1, al
 				
- 00000174  D8 0D 00000058 R	fmul     ten           ; move the hundredths to the whole part
+ 00000188  D8 0D 0000007A R	fmul     ten           ; move the hundredths to the whole part
 				; 3.400
- 0000017A  DB 15 00000054 R	fist     xswap
- 00000180  DA 25 00000054 R	fisub    xswap
+ 0000018E  DB 15 00000076 R	fist     xswap
+ 00000194  DA 25 00000076 R	fisub    xswap
 				; 0.400
- 00000186  A1 00000054 R	mov      eax, xswap
- 0000018B  83 C0 30		add      eax, 30h      ; convert
- 0000018E  A2 000000A4 R	mov      D2, al
+ 0000019A  A1 00000076 R	mov      eax, xswap
+ 0000019F  83 C0 30		add      eax, 30h      ; convert
+ 000001A2  A2 000000C6 R	mov      D2, al
 				
- 00000193  D8 0D 00000058 R	fmul     ten           ; move the thousandths to the whole part
+ 000001A7  D8 0D 0000007A R	fmul     ten           ; move the thousandths to the whole part
 				; 4.000
- 00000199  DB 15 00000054 R	fist     xswap
- 0000019F  DA 25 00000054 R	fisub    xswap
+ 000001AD  DB 15 00000076 R	fist     xswap
+ 000001B3  DA 25 00000076 R	fisub    xswap
 				; 0.000
- 000001A5  A1 00000054 R	mov      eax, xswap
- 000001AA  83 C0 30		add      eax, 30h      ; convert
- 000001AD  A2 000000A5 R	mov      D3, al
+ 000001B9  A1 00000076 R	mov      eax, xswap
+ 000001BE  83 C0 30		add      eax, 30h      ; convert
+ 000001C1  A2 000000C7 R	mov      D3, al
 				
 				output   labelx, outx    ; display the answer
 				
- 000001CB  49			dec ecx
- 000001CC  0F 85 FFFFFF5A	jnz outputLoop
-				  
- 000001D2  C3			ret
+ 000001DF  DB 1D 00000076 R	fistp    xswap
 				
- 000001D3			_MainProc ENDP
+ 000001E5  49			dec ecx
+ 000001E6  0F 85 FFFFFF54	jnz outputLoop
+				  
+ 000001EC  C3			ret
+				
+ 000001ED			GTH:
+				; you've found an imaginary number!
+				output GTHfail,GTHfail
+ 00000206  C3			ret
+				
+ 00000207			_MainProc ENDP
 				END					 ; end of source code
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/20/10 23:57:14
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
 .\hw5.asm						     Symbols 2 - 1
 
 
@@ -214,16 +239,17 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000000A7 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001D3 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000000C9 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000207 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000001D3 Public
-  outputLoop . . . . . . . . . .	L Near	 0000012C _TEXT	
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000207 Public
+  outputLoop . . . . . . . . . .	L Near	 00000140 _TEXT	
+  GTH  . . . . . . . . . . . . .	L Near	 000001ED _TEXT	
 
 
 Symbols:
@@ -242,28 +268,29 @@ Symbols:
 AA . . . . . . . . . . . . . . .	DWord	 00000000 _DATA	
 BB . . . . . . . . . . . . . . .	DWord	 00000004 _DATA	
 CC . . . . . . . . . . . . . . .	DWord	 00000008 _DATA	
-D1 . . . . . . . . . . . . . . .	Byte	 000000A3 _DATA	
-D2 . . . . . . . . . . . . . . .	Byte	 000000A4 _DATA	
-D3 . . . . . . . . . . . . . . .	Byte	 000000A5 _DATA	
-FOUR . . . . . . . . . . . . . .	DWord	 0000005C _DATA	
-TEN  . . . . . . . . . . . . . .	DWord	 00000058 _DATA	
-TWO  . . . . . . . . . . . . . .	DWord	 00000060 _DATA	
+D1 . . . . . . . . . . . . . . .	Byte	 000000C5 _DATA	
+D2 . . . . . . . . . . . . . . .	Byte	 000000C6 _DATA	
+D3 . . . . . . . . . . . . . . .	Byte	 000000C7 _DATA	
+FOUR . . . . . . . . . . . . . .	DWord	 0000007E _DATA	
+GTHfail  . . . . . . . . . . . .	Byte	 00000054 _DATA	
+TEN  . . . . . . . . . . . . . .	DWord	 0000007A _DATA	
+TWO  . . . . . . . . . . . . . .	DWord	 00000082 _DATA	
 _getInput  . . . . . . . . . . .	L Near	 00000000 FLAT	External
 _showOutput  . . . . . . . . . .	L Near	 00000000 FLAT	External
 atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
 atowproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
 dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
-inputx . . . . . . . . . . . . .	Byte	 0000006A _DATA	
+inputx . . . . . . . . . . . . .	Byte	 0000008C _DATA	
 labela . . . . . . . . . . . . .	Byte	 0000000C _DATA	
 labelb . . . . . . . . . . . . .	Byte	 00000024 _DATA	
 labelc . . . . . . . . . . . . .	Byte	 0000003C _DATA	
-labelx . . . . . . . . . . . . .	Byte	 0000007E _DATA	
-outx . . . . . . . . . . . . . .	Byte	 0000008F _DATA	
-statx  . . . . . . . . . . . . .	Word	 00000064 _DATA	
-testx  . . . . . . . . . . . . .	DWord	 00000066 _DATA	
-wholex . . . . . . . . . . . . .	Byte	 00000097 _DATA	
+labelx . . . . . . . . . . . . .	Byte	 000000A0 _DATA	
+outx . . . . . . . . . . . . . .	Byte	 000000B1 _DATA	
+statx  . . . . . . . . . . . . .	Word	 00000086 _DATA	
+testx  . . . . . . . . . . . . .	DWord	 00000088 _DATA	
+wholex . . . . . . . . . . . . .	Byte	 000000B9 _DATA	
 wtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
-xswap  . . . . . . . . . . . . .	DWord	 00000054 _DATA	
+xswap  . . . . . . . . . . . . .	DWord	 00000076 _DATA	
 
 	   0 Warnings
 	   0 Errors
