@@ -1,0 +1,273 @@
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 23:59:19
+.\justin.asm						     Page 1 - 1
+
+
+				; Assignmnet 5 assembly language program -
+				; impliment the quadratic formula
+				;
+				; THE NUMBER MUST BE INPUT IN BASE 10, 32bit SIGNED.
+				; 
+				; Author:  Justin Marbutt
+				; Date:    4/21/2010
+
+				.586
+				.MODEL FLAT
+
+				INCLUDE io.h            ; header file for input/output
+			      C ; IO.H -- header file for I/O macros (listing suppressed)
+			      C .NOLIST      ; turn off listing
+			      C .LIST        ; begin listing
+			      C 
+
+				.STACK 4096
+
+ 00000000			.DATA
+
+ 00000000 45 6E 74 65 72	promptA   BYTE    "Enter A", 0
+	   20 41 00
+ 00000008 45 6E 74 65 72	promptB   BYTE    "Enter B", 0
+	   20 42 00
+ 00000010 45 6E 74 65 72	promptC   BYTE    "Enter C", 0
+	   20 43 00
+ 00000018 4E 6F 20 61 6E	errorIm   BYTE    "No answers lie on the real number line.", 0
+	   73 77 65 72 73
+	   20 6C 69 65 20
+	   6F 6E 20 74 68
+	   65 20 72 65 61
+	   6C 20 6E 75 6D
+	   62 65 72 20 6C
+	   69 6E 65 2E 00
+ 00000040 45 72 72 6F 72	errorLbl  BYTE    "Error",0
+	   00
+ 00000046 41 6E 73 77 65	answerLbl BYTE    "Answer: ", 0
+	   72 3A 20 00
+ 0000004F 00000000		answer    DWORD   ?
+ 00000053 00000000		AA        DWORD   ?
+ 00000057 00000000		BB        DWORD   ?
+ 0000005B 00000000		CC        DWORD   ?
+ 0000005F 0000			convert   WORD    ?
+ 00000061 40800000		four      REAL4   4.0
+ 00000065 40000000		two       REAL4   2.0
+ 00000069 41200000		ten       REAL4   10.0
+ 0000006D BF800000		negOne    REAL4   -1.00
+
+ 00000071  00000028 [		string    BYTE    40 DUP (?)
+	    00
+	   ]
+ 00000099  0000000B [		wholeNum  BYTE    11 DUP (?)
+	    00
+	   ]
+ 000000A4  2E			          BYTE    "."
+ 000000A5 00			Dec1      BYTE    ?
+ 000000A6 00			Dec2      BYTE    ?
+ 000000A7 00			Dec3      BYTE    ?
+ 000000A8  00			          BYTE    0
+
+
+
+
+
+ 00000000			.CODE
+ 00000000			_MainProc PROC
+
+				        
+				        ;prepare floating point stack
+				        
+ 00000000  9B DB E3		        finit
+ 00000003  9B D9 3D		        fstcw   convert                    ;set to trunkate mode
+	   0000005F R
+ 0000000A  66| 81 0D		        or      convert, 0F00h
+	   0000005F R
+	   0F00
+ 00000013  D9 2D 0000005F R	        fldcw   convert
+				        
+				        ;Take input of varaibles
+				        
+				        input   promptA, string, 40        ; read ASCII characters
+				        atod    string                     ; convert to integer
+ 00000046  A3 00000053 R	        mov     AA, eax                    ; move input to A
+				        input   promptB, string, 40        ; read ASCII characters
+				        atod    string                     ; convert to integer
+ 00000078  A3 00000057 R	        mov     BB, eax                    ; move input to B
+				        input   promptC, string, 40        ; read ASCII characters
+				        atod    string                     ; convert to integer
+ 000000AA  A3 0000005B R	        mov     CC, eax                    ; move input to C
+				        
+				        ;Evaluate the sqrt for a negative value
+				        
+ 000000AF  A1 00000057 R	        mov     eax, BB                    ; move B to EAX
+ 000000B4  0F AF 05		        imul    eax, BB                    ; B^2
+	   00000057 R
+				        
+ 000000BB  8B 1D 00000053 R	        mov     ebx, AA                    ; move A to EBX
+ 000000C1  8B 0D 0000005B R	        mov     ecx, CC                    ; move C to ECX
+ 000000C7  0F AF D9		        imul    ebx, ecx                   ; A * C
+ 000000CA  6B DB 04		        imul    ebx, 4                     ; 4 * A * C
+ 000000CD  2B C3		        sub     eax, ebx                   ; B^2 - (4 * A * C)
+ 000000CF  79 1C		        jns     realValue                  ; jump if not negative
+				        output  errorLbl, errorIm          ; if negative throw error
+ 000000EA  33 C0		        xor     eax,eax                    ; eax return code 0
+ 000000EC  C3			        ret                                ; exit
+				        
+				        
+ 000000ED			realValue:
+				        
+				        
+				        ;Compute (-b + sqrt(b*b-4*a*c))/(2*a)
+				        
+ 000000ED  DB 05 00000053 R	        fild    AA
+ 000000F3  DB 05 0000005B R	        fild    CC
+ 000000F9  DE C9		        fmul
+ 000000FB  D8 0D 00000061 R	        fmul    four
+ 00000101  DB 05 00000057 R	        fild    BB
+ 00000107  DB 05 00000057 R	        fild    BB
+ 0000010D  DE C9		        fmul
+ 0000010F  DE E9		        fsub
+ 00000111  D9 FA		        fsqrt
+ 00000113  DB 05 00000057 R	        fild    BB
+ 00000119  D8 0D 0000006D R	        fmul    negOne
+ 0000011F  DE C1		        fadd
+ 00000121  DB 05 00000053 R	        fild    AA
+ 00000127  D8 0D 00000065 R	        fmul    two
+ 0000012D  DE F9		        fdiv
+				        
+ 0000012F  DB 05 00000053 R	        fild    AA
+ 00000135  DB 05 0000005B R	        fild    CC
+ 0000013B  DE C9		        fmul
+ 0000013D  D8 0D 00000061 R	        fmul    four
+ 00000143  DB 05 00000057 R	        fild    BB
+ 00000149  DB 05 00000057 R	        fild    BB
+ 0000014F  DE C9		        fmul
+ 00000151  DE E9		        fsub
+ 00000153  D9 FA		        fsqrt
+ 00000155  DB 05 00000057 R	        fild    BB
+ 0000015B  D8 0D 0000006D R	        fmul    negOne
+ 00000161  DE E9		        fsub
+ 00000163  DB 05 00000053 R	        fild    AA
+ 00000169  D8 0D 00000065 R	        fmul    two
+ 0000016F  DE F9		        fdiv
+				        
+				        ;mov    ecx, 2
+				       
+ 00000171			outLoopx:
+				        
+ 00000171  DB 15 0000004F R	        fist    answer
+ 00000177  A1 0000004F R	        mov     eax, answer
+				        dtoa    wholeNum, eax
+				        
+ 00000194  DA 25 0000004F R	        fisub   answer
+ 0000019A  D9 E1		        fabs 
+				           
+ 0000019C  D8 0D 00000069 R	        fmul    ten
+ 000001A2  DB 15 0000004F R	        fist    answer
+ 000001A8  DA 25 0000004F R	        fisub   answer
+ 000001AE  A1 0000004F R	        mov     eax, answer
+ 000001B3  83 C0 30		        add     eax, 30h
+				        ;THISa
+				        ;mov     D1, al
+				        
+ 000001B6  D8 0D 00000069 R	        fmul    ten 
+ 000001BC  DB 15 0000004F R	        fist    answer
+ 000001C2  DA 25 0000004F R	        fisub   answer
+ 000001C8  A1 0000004F R	        mov     eax, answer
+ 000001CD  83 C0 30		        add     eax, 30h
+				        ;THIS
+				        ;mov     D2, al
+				        
+ 000001D0  D8 0D 00000069 R	        fmul    ten
+ 000001D6  DB 15 0000004F R	        fist    answer
+ 000001DC  DA 25 0000004F R	        fisub   answer
+ 000001E2  A1 0000004F R	        mov     eax, answer
+ 000001E7  83 C0 30		        add     eax, 30h
+				        ;THIS
+				        ;mov     D3, al
+				        
+				        ;THIS 
+				        ;fistp   answer
+				        
+ 000001EA  E2 85		        loop    outLoopx
+
+ 000001EC  B8 00000000		        mov     eax, 0                     ; exit with return code 0
+ 000001F1  C3			        ret
+				        
+ 000001F2			_MainProc ENDP
+				END
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 23:59:19
+.\justin.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+atod . . . . . . . . . . . . . .	Proc
+atow . . . . . . . . . . . . . .	Proc
+dtoa . . . . . . . . . . . . . .	Proc
+input  . . . . . . . . . . . . .	Proc
+output . . . . . . . . . . . . .	Proc
+wtoa . . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 000000A9 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001F2 Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000001F2 Public
+  realValue  . . . . . . . . . .	L Near	 000000ED _TEXT	
+  outLoopx . . . . . . . . . . .	L Near	 00000171 _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+AA . . . . . . . . . . . . . . .	DWord	 00000053 _DATA	
+BB . . . . . . . . . . . . . . .	DWord	 00000057 _DATA	
+CC . . . . . . . . . . . . . . .	DWord	 0000005B _DATA	
+Dec1 . . . . . . . . . . . . . .	Byte	 000000A5 _DATA	
+Dec2 . . . . . . . . . . . . . .	Byte	 000000A6 _DATA	
+Dec3 . . . . . . . . . . . . . .	Byte	 000000A7 _DATA	
+_getInput  . . . . . . . . . . .	L Near	 00000000 FLAT	External
+_showOutput  . . . . . . . . . .	L Near	 00000000 FLAT	External
+answerLbl  . . . . . . . . . . .	Byte	 00000046 _DATA	
+answer . . . . . . . . . . . . .	DWord	 0000004F _DATA	
+atodproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+atowproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+convert  . . . . . . . . . . . .	Word	 0000005F _DATA	
+dtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+errorIm  . . . . . . . . . . . .	Byte	 00000018 _DATA	
+errorLbl . . . . . . . . . . . .	Byte	 00000040 _DATA	
+four . . . . . . . . . . . . . .	DWord	 00000061 _DATA	
+negOne . . . . . . . . . . . . .	DWord	 0000006D _DATA	
+promptA  . . . . . . . . . . . .	Byte	 00000000 _DATA	
+promptB  . . . . . . . . . . . .	Byte	 00000008 _DATA	
+promptC  . . . . . . . . . . . .	Byte	 00000010 _DATA	
+string . . . . . . . . . . . . .	Byte	 00000071 _DATA	
+ten  . . . . . . . . . . . . . .	DWord	 00000069 _DATA	
+two  . . . . . . . . . . . . . .	DWord	 00000065 _DATA	
+wholeNum . . . . . . . . . . . .	Byte	 00000099 _DATA	
+wtoaproc . . . . . . . . . . . .	L Near	 00000000 FLAT	External
+
+	   0 Warnings
+	   0 Errors

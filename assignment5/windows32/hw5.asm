@@ -34,6 +34,11 @@ D1       BYTE     ?
 D2       BYTE     ?
 D3       BYTE     ?
          BYTE     0
+         
+outz     BYTE     "answer:          -0."
+D1z      BYTE     ?
+D2z      BYTE     ?
+D3z      BYTE     ?
 
 .CODE
 _MainProc PROC
@@ -130,7 +135,71 @@ fdiv
 mov ecx, 2
 
 outputLoop:
+; Handling errors related to negative numbers
+; If the value on the stack is negative
+fldz
+fxch
+fcom     st(1)
+fxch
+fistp    xswap         ; pop the zero
+fstsw    ax
+sahf
+jae      negskip ; if positive
 
+; else
+
+; Absolute value it, negate the value in eax
+fabs
+
+; change output strings
+
+fist     xswap         ; move the integer part off
+fisub    xswap         ; clear the whole part off the stack
+
+mov      eax, xswap
+neg      eax
+; if the value is 0
+cmp      eax, 0
+je       worstcase
+dtoa     wholex, eax
+
+fmul     ten           ; move the tenths to the whole part
+; 2.340
+fist     xswap
+fisub    xswap
+; 0.340
+mov      eax, xswap
+add      eax, 30h      ; convert
+mov      D1, al
+
+fmul     ten           ; move the hundredths to the whole part
+; 3.400
+fist     xswap
+fisub    xswap
+; 0.400
+mov      eax, xswap
+add      eax, 30h      ; convert
+mov      D2, al
+
+fmul     ten           ; move the thousandths to the whole part
+; 4.000
+fist     xswap
+fisub    xswap
+; 0.000
+mov      eax, xswap
+add      eax, 30h      ; convert
+mov      D3, al
+
+output   labelx, outx    ; display the answer
+
+fistp    xswap
+
+dec ecx
+jnz outputLoop
+jmp      endx
+
+; positive values
+negskip:
 fist     xswap         ; move the integer part off
 fisub    xswap         ; clear the whole part off the stack
 
@@ -170,7 +239,47 @@ fistp    xswap
 
 dec ecx
 jnz outputLoop
-  
+jmp      endx
+
+worstcase:
+fist     xswap         ; move the integer part off
+fisub    xswap         ; clear the whole part off the stack
+
+fmul     ten           ; move the tenths to the whole part
+; 2.340
+fist     xswap
+fisub    xswap
+; 0.340
+mov      eax, xswap
+add      eax, 30h      ; convert
+mov      D1z, al
+
+fmul     ten           ; move the hundredths to the whole part
+; 3.400
+fist     xswap
+fisub    xswap
+; 0.400
+mov      eax, xswap
+add      eax, 30h      ; convert
+mov      D2z, al
+
+fmul     ten           ; move the thousandths to the whole part
+; 4.000
+fist     xswap
+fisub    xswap
+; 0.000
+mov      eax, xswap
+add      eax, 30h      ; convert
+mov      D3z, al
+
+output   labelx, outz    ; display the answer
+
+fistp    xswap
+
+dec ecx
+jnz outputLoop
+
+endx:
 ret
 
 GTH:

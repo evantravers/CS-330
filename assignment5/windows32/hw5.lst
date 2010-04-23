@@ -1,21 +1,21 @@
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/23/10 02:45:46
 .\hw5.asm						     Page 1 - 1
 
 
 				; Author:  E. Travers
 				; Date:    4/2010
-				
+
 				.586
 				.MODEL FLAT
-				
+
 				INCLUDE io.h				 ; header file for input/output
 			      C ; IO.H -- header file for I/O macros (listing suppressed)
 			      C .NOLIST      ; turn off listing
 			      C .LIST        ; begin listing
 			      C 
-				
+
 				.STACK 4096
-				
+
  00000000			.DATA
  00000000 00000000		AA       DWORD    ?
  00000004 00000000		BB       DWORD    ?
@@ -42,7 +42,7 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
 	   69 6E 61 72 79
 	   20 6E 75 6D 62
 	   65 72 21 00
-				
+
  00000076 00000000		xswap    DWORD    ?
  0000007A 41200000		TEN      REAL4    10.0
  0000007E 40800000		FOUR     REAL4    4.0  
@@ -52,12 +52,12 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
  0000008C  00000014 [		inputx   BYTE     20 dup (?)
 	    00
 	   ]
-				
+
  000000A0 48 65 72 65 27	labelx   BYTE     "Here's your sign",0
 	   73 20 79 6F 75
 	   72 20 73 69 67
 	   6E 00
-				
+
  000000B1 61 6E 73 77 65	outx     BYTE     "answer: "
 	   72 3A 20
  000000B9			wholex   BYTE     11 dup (?)
@@ -66,15 +66,23 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
  000000C6 00			D2       BYTE     ?
  000000C7 00			D3       BYTE     ?
  000000C8  00			         BYTE     0
-				
+				         
+ 000000C9 61 6E 73 77 65	outz     BYTE     "answer:          -0."
+	   72 3A 20 20 20
+	   20 20 20 20 20
+	   20 20 2D 30 2E
+ 000000DD 00			D1z      BYTE     ?
+ 000000DE 00			D2z      BYTE     ?
+ 000000DF 00			D3z      BYTE     ?
+
  00000000			.CODE
  00000000			_MainProc PROC
-				
+
 				; performs the quadratic formula
 				; AX^2 + BX + C
-				
+
  00000000  9B DB E3		finit
-				
+
 				; set to truncate mode
  00000003  9B D9 3D		fstcw    statx
 	   00000086 R
@@ -82,33 +90,33 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
 	   00000086 R
 	   0F00
  00000013  D9 2D 00000086 R	fldcw    statx
-				
+
 				; get integers in
-				
+
 				; =======================================
 				; INPUT
 				; =======================================
-				
+
 				input    labela, inputx, 40
 				atod     inputx
  00000046  A3 00000000 R	mov      AA, eax
-				
+
 				input    labelb, inputx, 40
 				atod     inputx
  00000078  A3 00000004 R	mov      BB, eax
-				
+
 				input    labelc, inputx, 40
 				atod     inputx
  000000AA  A3 00000008 R	mov      CC, eax
-				
+
 				; compute the quadratic formula, leaving it at the top of the
 				; floating point stack
-				
+
 				; =======================================
 				; COMPUTATION
 				; =======================================
 				; (-b + sqrt(b*b-4*a*c))/(2*a)
-				
+
  000000AF  DB 05 00000004 R	fild     BB
  000000B5  DB 05 00000004 R	fild     BB
  000000BB  DE C9		fmul
@@ -118,22 +126,22 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
  000000CB  D8 0D 0000007E R	fmul     FOUR
  000000D1  DE E9		fsub
  000000D3  D9 FA		fsqrt
-				
+
 				; to handle the imaginary number problem
  000000D5  D9 EE		fldz
  000000D7  D9 C9		fxch
  000000D9  D8 D1		fcom st(1)
  000000DB  9B DF E0		fstsw ax
  000000DE  9E			sahf
- 000000DF  0F 82 00000108	jnae GTH ; if negative
-				
+ 000000DF  0F 82 00000272	jnae GTH ; if negative
+
  000000E5  DB 05 00000004 R	fild     BB
  000000EB  D9 E0		fchs   
  000000ED  DE E1		fsubr
  000000EF  DB 05 00000000 R	fild     AA
  000000F5  D8 0D 00000082 R	fmul     TWO
  000000FB  DE F9		fdiv
-				
+
  000000FD  DB 05 00000004 R	fild     BB
  00000103  DB 05 00000004 R	fild     BB
  00000109  DE C9		fmul
@@ -149,73 +157,177 @@ Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
  0000012D  DB 05 00000000 R	fild     AA
  00000133  D8 0D 00000082 R	fmul     TWO
  00000139  DE F9		fdiv
-				
+
 				; =======================================
 				; OUTPUT
 				; =======================================
-				
+
 				; code to decode final answer and put it in outx
 				; considering a whole floating point on the stack
 				; like 1.234
-				
+
 				; time to get the integer part off, and clear it off the answer
 				; on the top of the stack
-				
+
 				; do it twice for both numbers
  0000013B  B9 00000002		mov ecx, 2
-				
+
  00000140			outputLoop:
-				
- 00000140  DB 15 00000076 R	fist     xswap         ; move the integer part off
- 00000146  DA 25 00000076 R	fisub    xswap         ; clear the whole part off the stack
-				
- 0000014C  A1 00000076 R	mov      eax, xswap
+				; Handling errors related to negative numbers
+				; If the value on the stack is negative
+ 00000140  D9 EE		fldz
+ 00000142  D9 C9		fxch
+ 00000144  D8 D1		fcom     st(1)
+ 00000146  D9 C9		fxch
+ 00000148  DB 1D 00000076 R	fistp    xswap         ; pop the zero
+ 0000014E  9B DF E0		fstsw    ax
+ 00000151  9E			sahf
+ 00000152  0F 83 000000BE	jae      negskip ; if positive
+
+				; else
+
+				; Absolute value it, negate the value in eax
+ 00000158  D9 E1		fabs
+
+				; change output strings
+
+ 0000015A  DB 15 00000076 R	fist     xswap         ; move the integer part off
+ 00000160  DA 25 00000076 R	fisub    xswap         ; clear the whole part off the stack
+
+ 00000166  A1 00000076 R	mov      eax, xswap
+ 0000016B  F7 D8		neg      eax
+				; if the value is 0
+ 0000016D  83 F8 00		cmp      eax, 0
+ 00000170  0F 84 00000151	je       worstcase
 				dtoa     wholex, eax
-				
- 00000169  D8 0D 0000007A R	fmul     ten           ; move the tenths to the whole part
+
+ 0000018E  D8 0D 0000007A R	fmul     ten           ; move the tenths to the whole part
 				; 2.340
- 0000016F  DB 15 00000076 R	fist     xswap
- 00000175  DA 25 00000076 R	fisub    xswap
+ 00000194  DB 15 00000076 R	fist     xswap
+ 0000019A  DA 25 00000076 R	fisub    xswap
 				; 0.340
- 0000017B  A1 00000076 R	mov      eax, xswap
- 00000180  83 C0 30		add      eax, 30h      ; convert
- 00000183  A2 000000C5 R	mov      D1, al
-				
- 00000188  D8 0D 0000007A R	fmul     ten           ; move the hundredths to the whole part
+ 000001A0  A1 00000076 R	mov      eax, xswap
+ 000001A5  83 C0 30		add      eax, 30h      ; convert
+ 000001A8  A2 000000C5 R	mov      D1, al
+
+ 000001AD  D8 0D 0000007A R	fmul     ten           ; move the hundredths to the whole part
 				; 3.400
- 0000018E  DB 15 00000076 R	fist     xswap
- 00000194  DA 25 00000076 R	fisub    xswap
+ 000001B3  DB 15 00000076 R	fist     xswap
+ 000001B9  DA 25 00000076 R	fisub    xswap
 				; 0.400
- 0000019A  A1 00000076 R	mov      eax, xswap
- 0000019F  83 C0 30		add      eax, 30h      ; convert
- 000001A2  A2 000000C6 R	mov      D2, al
-				
- 000001A7  D8 0D 0000007A R	fmul     ten           ; move the thousandths to the whole part
+ 000001BF  A1 00000076 R	mov      eax, xswap
+ 000001C4  83 C0 30		add      eax, 30h      ; convert
+ 000001C7  A2 000000C6 R	mov      D2, al
+
+ 000001CC  D8 0D 0000007A R	fmul     ten           ; move the thousandths to the whole part
 				; 4.000
- 000001AD  DB 15 00000076 R	fist     xswap
- 000001B3  DA 25 00000076 R	fisub    xswap
+ 000001D2  DB 15 00000076 R	fist     xswap
+ 000001D8  DA 25 00000076 R	fisub    xswap
 				; 0.000
- 000001B9  A1 00000076 R	mov      eax, xswap
- 000001BE  83 C0 30		add      eax, 30h      ; convert
- 000001C1  A2 000000C7 R	mov      D3, al
-				
+ 000001DE  A1 00000076 R	mov      eax, xswap
+ 000001E3  83 C0 30		add      eax, 30h      ; convert
+ 000001E6  A2 000000C7 R	mov      D3, al
+
 				output   labelx, outx    ; display the answer
-				
- 000001DF  DB 1D 00000076 R	fistp    xswap
-				
- 000001E5  49			dec ecx
- 000001E6  0F 85 FFFFFF54	jnz outputLoop
-				  
- 000001EC  C3			ret
-				
- 000001ED			GTH:
+
+ 00000204  DB 1D 00000076 R	fistp    xswap
+
+ 0000020A  49			dec ecx
+ 0000020B  0F 85 FFFFFF2F	jnz outputLoop
+ 00000211  E9 00000140		jmp      endx
+
+				; positive values
+ 00000216			negskip:
+ 00000216  DB 15 00000076 R	fist     xswap         ; move the integer part off
+ 0000021C  DA 25 00000076 R	fisub    xswap         ; clear the whole part off the stack
+
+ 00000222  A1 00000076 R	mov      eax, xswap
+				dtoa     wholex, eax
+
+ 0000023F  D8 0D 0000007A R	fmul     ten           ; move the tenths to the whole part
+				; 2.340
+ 00000245  DB 15 00000076 R	fist     xswap
+ 0000024B  DA 25 00000076 R	fisub    xswap
+				; 0.340
+ 00000251  A1 00000076 R	mov      eax, xswap
+ 00000256  83 C0 30		add      eax, 30h      ; convert
+ 00000259  A2 000000C5 R	mov      D1, al
+
+ 0000025E  D8 0D 0000007A R	fmul     ten           ; move the hundredths to the whole part
+				; 3.400
+ 00000264  DB 15 00000076 R	fist     xswap
+ 0000026A  DA 25 00000076 R	fisub    xswap
+				; 0.400
+ 00000270  A1 00000076 R	mov      eax, xswap
+ 00000275  83 C0 30		add      eax, 30h      ; convert
+ 00000278  A2 000000C6 R	mov      D2, al
+
+ 0000027D  D8 0D 0000007A R	fmul     ten           ; move the thousandths to the whole part
+				; 4.000
+ 00000283  DB 15 00000076 R	fist     xswap
+ 00000289  DA 25 00000076 R	fisub    xswap
+				; 0.000
+ 0000028F  A1 00000076 R	mov      eax, xswap
+ 00000294  83 C0 30		add      eax, 30h      ; convert
+ 00000297  A2 000000C7 R	mov      D3, al
+
+				output   labelx, outx    ; display the answer
+
+ 000002B5  DB 1D 00000076 R	fistp    xswap
+
+ 000002BB  49			dec ecx
+ 000002BC  0F 85 FFFFFE7E	jnz outputLoop
+ 000002C2  E9 0000008F		jmp      endx
+
+ 000002C7			worstcase:
+ 000002C7  DB 15 00000076 R	fist     xswap         ; move the integer part off
+ 000002CD  DA 25 00000076 R	fisub    xswap         ; clear the whole part off the stack
+
+ 000002D3  D8 0D 0000007A R	fmul     ten           ; move the tenths to the whole part
+				; 2.340
+ 000002D9  DB 15 00000076 R	fist     xswap
+ 000002DF  DA 25 00000076 R	fisub    xswap
+				; 0.340
+ 000002E5  A1 00000076 R	mov      eax, xswap
+ 000002EA  83 C0 30		add      eax, 30h      ; convert
+ 000002ED  A2 000000DD R	mov      D1z, al
+
+ 000002F2  D8 0D 0000007A R	fmul     ten           ; move the hundredths to the whole part
+				; 3.400
+ 000002F8  DB 15 00000076 R	fist     xswap
+ 000002FE  DA 25 00000076 R	fisub    xswap
+				; 0.400
+ 00000304  A1 00000076 R	mov      eax, xswap
+ 00000309  83 C0 30		add      eax, 30h      ; convert
+ 0000030C  A2 000000DE R	mov      D2z, al
+
+ 00000311  D8 0D 0000007A R	fmul     ten           ; move the thousandths to the whole part
+				; 4.000
+ 00000317  DB 15 00000076 R	fist     xswap
+ 0000031D  DA 25 00000076 R	fisub    xswap
+				; 0.000
+ 00000323  A1 00000076 R	mov      eax, xswap
+ 00000328  83 C0 30		add      eax, 30h      ; convert
+ 0000032B  A2 000000DF R	mov      D3z, al
+
+				output   labelx, outz    ; display the answer
+
+ 00000349  DB 1D 00000076 R	fistp    xswap
+
+ 0000034F  49			dec ecx
+ 00000350  0F 85 FFFFFDEA	jnz outputLoop
+
+ 00000356			endx:
+ 00000356  C3			ret
+
+ 00000357			GTH:
 				; you've found an imaginary number!
 				output GTHfail,GTHfail
- 00000206  C3			ret
-				
- 00000207			_MainProc ENDP
+ 00000370  C3			ret
+
+ 00000371			_MainProc ENDP
 				END					 ; end of source code
-Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/22/10 16:30:51
+Microsoft (R) Macro Assembler Version 9.00.21022.08	    04/23/10 02:45:46
 .\hw5.asm						     Symbols 2 - 1
 
 
@@ -239,17 +351,20 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000000C9 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000207 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000000E0 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000371 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000207 Public
+_MainProc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000371 Public
   outputLoop . . . . . . . . . .	L Near	 00000140 _TEXT	
-  GTH  . . . . . . . . . . . . .	L Near	 000001ED _TEXT	
+  negskip  . . . . . . . . . . .	L Near	 00000216 _TEXT	
+  worstcase  . . . . . . . . . .	L Near	 000002C7 _TEXT	
+  endx . . . . . . . . . . . . .	L Near	 00000356 _TEXT	
+  GTH  . . . . . . . . . . . . .	L Near	 00000357 _TEXT	
 
 
 Symbols:
@@ -268,8 +383,11 @@ Symbols:
 AA . . . . . . . . . . . . . . .	DWord	 00000000 _DATA	
 BB . . . . . . . . . . . . . . .	DWord	 00000004 _DATA	
 CC . . . . . . . . . . . . . . .	DWord	 00000008 _DATA	
+D1z  . . . . . . . . . . . . . .	Byte	 000000DD _DATA	
 D1 . . . . . . . . . . . . . . .	Byte	 000000C5 _DATA	
+D2z  . . . . . . . . . . . . . .	Byte	 000000DE _DATA	
 D2 . . . . . . . . . . . . . . .	Byte	 000000C6 _DATA	
+D3z  . . . . . . . . . . . . . .	Byte	 000000DF _DATA	
 D3 . . . . . . . . . . . . . . .	Byte	 000000C7 _DATA	
 FOUR . . . . . . . . . . . . . .	DWord	 0000007E _DATA	
 GTHfail  . . . . . . . . . . . .	Byte	 00000054 _DATA	
@@ -286,6 +404,7 @@ labelb . . . . . . . . . . . . .	Byte	 00000024 _DATA
 labelc . . . . . . . . . . . . .	Byte	 0000003C _DATA	
 labelx . . . . . . . . . . . . .	Byte	 000000A0 _DATA	
 outx . . . . . . . . . . . . . .	Byte	 000000B1 _DATA	
+outz . . . . . . . . . . . . . .	Byte	 000000C9 _DATA	
 statx  . . . . . . . . . . . . .	Word	 00000086 _DATA	
 testx  . . . . . . . . . . . . .	DWord	 00000088 _DATA	
 wholex . . . . . . . . . . . . .	Byte	 000000B9 _DATA	
